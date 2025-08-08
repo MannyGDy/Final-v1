@@ -1,0 +1,52 @@
+<%- include('partials/head') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="fw-bold">Admin Dashboard</h2>
+  <div>
+    <a class="btn btn-outline-secondary" href="/admin/users.csv">Download CSV</a>
+    <a class="btn btn-outline-danger" href="/admin/logout">Logout</a>
+  </div>
+  </div>
+
+<div class="card shadow-sm">
+  <div class="card-header bg-white"><strong>Registered Users</strong></div>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Full name</th>
+          <th>Company</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!users || users.length === 0) { %>
+          <tr><td colspan="6" class="text-center text-muted">No users yet</td></tr>
+        <% } %>
+        <% users && users.forEach((u, idx) => { %>
+          <tr>
+            <td><%= idx+1 %></td>
+            <td><%= u.full_name %></td>
+            <td><%= u.company %></td>
+            <td><%= u.email %></td>
+            <td><%= u.phone %></td>
+            <td><%= new Date(u.created_at).toLocaleString() %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="mt-4">
+  <a class="btn btn-primary" href="/admin/stats">View Statistics</a>
+  <a class="btn btn-outline-primary" href="/admin/stats.csv">Download Stats CSV</a>
+  <a class="btn btn-link" href="/">Back to Portal</a>
+</div>
+
+<%- include('partials/foot') %>
+
+

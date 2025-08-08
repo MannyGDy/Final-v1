@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+
+<div class="row align-items-center g-5">
+  <div class="col-lg-6">
+    <h1 class="display-5 fw-bold">Welcome</h1>
+    <p class="lead">Connect to the network by signing up or signing in below. This captive portal authenticates with our RADIUS server.</p>
+    <% if (flash.error && flash.error.length) { %>
+      <div class="alert alert-danger"><%= flash.error[0] %></div>
+    <% } %>
+    <% if (flash.success && flash.success.length) { %>
+      <div class="alert alert-success"><%= flash.success[0] %></div>
+    <% } %>
+    <div class="d-flex gap-3 mt-3">
+      <a class="btn btn-primary btn-lg" href="/signup">Sign Up</a>
+      <a class="btn btn-outline-primary btn-lg" href="/signin">Sign In</a>
+    </div>
+  </div>
+  <div class="col-lg-6 text-center">
+    <img src="/public/portal.svg" alt="Portal" class="img-fluid" style="max-height: 320px;">
+  </div>
+  <div class="text-muted small mt-4">Managed by MikroTik | Backed by FreeRADIUS</div>
+</div>
+
+<%- include('partials/foot') %>
+
+

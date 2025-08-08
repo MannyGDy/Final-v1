@@ -1,0 +1,135 @@
+<%- include('partials/head') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="fw-bold">Statistics</h2>
+  <div>
+    <a class="btn btn-outline-secondary" href="/admin/stats.csv">Download CSV</a>
+    <a class="btn btn-outline-danger" href="/admin/logout">Logout</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted">Total Users</div>
+        <div class="display-6 fw-bold"><%= totals.totalUsers %></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted">Active Users (24h)</div>
+        <div class="display-6 fw-bold"><%= totals.activeUsers24h %></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted">Total Data Used</div>
+        <div class="display-6 fw-bold"><%= (Number(totals.totalOctets) / (1024*1024)).toFixed(2) %> MB</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form method="get" action="/admin/stats" class="card p-3 mb-3 shadow-sm">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label">Start</label>
+      <input type="datetime-local" name="start" value="<%= filters.start || '' %>" class="form-control" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">End</label>
+      <input type="datetime-local" name="end" value="<%= filters.end || '' %>" class="form-control" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Sort</label>
+      <select name="sort" class="form-select">
+        <option value="last_login" <%= filters.sort === 'last_login' ? 'selected' : '' %>>Last Login</option>
+        <option value="username" <%= filters.sort === 'username' ? 'selected' : '' %>>Username</option>
+        <option value="sessions" <%= filters.sort === 'sessions' ? 'selected' : '' %>>Sessions</option>
+        <option value="total_time" <%= filters.sort === 'total_time' ? 'selected' : '' %>>Total Time</option>
+        <option value="input_octets" <%= filters.sort === 'input_octets' ? 'selected' : '' %>>Input Octets</option>
+        <option value="output_octets" <%= filters.sort === 'output_octets' ? 'selected' : '' %>>Output Octets</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Direction</label>
+      <select name="dir" class="form-select">
+        <option value="desc" <%= String(filters.dir).toLowerCase() === 'desc' ? 'selected' : '' %>>Desc</option>
+        <option value="asc" <%= String(filters.dir).toLowerCase() === 'asc' ? 'selected' : '' %>>Asc</option>
+      </select>
+    </div>
+    <div class="col-md-1">
+      <button class="btn btn-primary w-100">Apply</button>
+    </div>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-striped align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Sessions</th>
+          <th>Last Login</th>
+          <th>Total Time (s)</th>
+          <th>Input Octets</th>
+          <th>Output Octets</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!perUser || perUser.length === 0) { %>
+          <tr><td colspan="6" class="text-center text-muted">No data</td></tr>
+        <% } %>
+        <% perUser && perUser.forEach((r) => { %>
+          <tr>
+            <td><%= r.username %></td>
+            <td><%= r.sessions %></td>
+            <td><%= r.last_login ? new Date(r.last_login).toLocaleString() : '' %></td>
+            <td><%= r.total_time %></td>
+            <td><%= r.input_octets %></td>
+            <td><%= r.output_octets %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="mt-4">
+  <canvas id="trafficChart" height="80"></canvas>
+</div>
+
+<script>
+  (() => {
+    const labels = <%- JSON.stringify((perUser || []).map(r => r.username)) %>;
+    const inputData = <%- JSON.stringify((perUser || []).map(r => Number(r.input_octets))) %>;
+    const outputData = <%- JSON.stringify((perUser || []).map(r => Number(r.output_octets))) %>;
+    const ctx = document.getElementById('trafficChart');
+    if (ctx && labels.length) {
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Input Octets', data: inputData, backgroundColor: 'rgba(13,110,253,.5)' },
+            { label: 'Output Octets', data: outputData, backgroundColor: 'rgba(25,135,84,.5)' }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+  })();
+</script>
+
+<%- include('partials/foot') %>
+
+
