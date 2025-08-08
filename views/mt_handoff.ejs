@@ -1,0 +1,44 @@
+<%- include('partials/head') %>
+
+<div class="py-5 text-center">
+  <h2 class="fw-bold">Authorizing...</h2>
+  <p class="text-muted">Please wait while we complete your login.</p>
+
+  <form id="mtForm" method="post" action="<%= linkLoginOnly %>" class="d-none">
+    <% if (chapId && chapChallenge && chapMd5) { %>
+      <input type="hidden" name="username" value="<%= email %>">
+      <input type="hidden" name="password" value="<%= chapMd5 %>">
+      <input type="hidden" name="chap-id" value="<%= chapId %>">
+      <input type="hidden" name="chap-challenge" value="<%= chapChallenge %>">
+    <% } else { %>
+      <input type="hidden" name="username" value="<%= email %>">
+      <input type="hidden" name="password" value="<%= phone %>">
+    <% } %>
+    <% if (dst) { %>
+      <input type="hidden" name="dst" value="<%= dst %>">
+    <% } %>
+    <% if (popup) { %>
+      <input type="hidden" name="popup" value="<%= popup %>">
+    <% } %>
+  </form>
+
+  <div class="mt-4">
+    <a class="btn btn-primary" id="submitBtn">Continue</a>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const form = document.getElementById('mtForm');
+    const btn = document.getElementById('submitBtn');
+    if (btn && form) {
+      btn.addEventListener('click', () => form.submit());
+      // auto-submit after short delay
+      setTimeout(() => form.submit(), 500);
+    }
+  })();
+</script>
+
+<%- include('partials/foot') %>
+
+

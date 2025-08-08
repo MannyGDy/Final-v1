@@ -10,6 +10,13 @@
       <div class="alert alert-success"><%= flash.success[0] %></div>
     <% } %>
     <form method="post" action="/signin" class="card p-4 shadow-sm">
+      <% if (typeof mt !== 'undefined') { %>
+        <input type="hidden" name="linkLoginOnly" value="<%= mt.linkLoginOnly %>">
+        <input type="hidden" name="dst" value="<%= mt.dst %>">
+        <input type="hidden" name="popup" value="<%= mt.popup %>">
+        <input type="hidden" name="chapId" value="<%= mt.chapId %>">
+        <input type="hidden" name="chapChallenge" value="<%= mt.chapChallenge %>">
+      <% } %>
       <div class="mb-3">
         <label class="form-label">Email</label>
         <input type="email" name="email" class="form-control" required />

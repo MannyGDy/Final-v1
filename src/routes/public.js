@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const { pool, query, dbSchema } = require('../db');
 
 const router = express.Router();
@@ -68,11 +69,23 @@ router.post('/signup', async (req, res) => {
 });
 
 router.get('/signin', (req, res) => {
-  res.render('signin', { title: 'Sign In' });
+  const mt = {
+    linkLoginOnly: req.query['link-login-only'] || req.query.linkLoginOnly || '',
+    dst: req.query.dst || '',
+    popup: req.query.popup || '',
+    chapId: req.query['chap-id'] || req.query.chapId || '',
+    chapChallenge: req.query['chap-challenge'] || req.query.chapChallenge || '',
+  };
+  res.render('signin', { title: 'Sign In', mt });
 });
 
 router.post('/signin', async (req, res) => {
   const { email, phone } = req.body;
+  const linkLoginOnly = req.body.linkLoginOnly || '';
+  const dst = req.body.dst || '';
+  const popup = req.body.popup || '';
+  const chapId = req.body.chapId || '';
+  const chapChallenge = req.body.chapChallenge || '';
   if (!email || !phone) {
     req.flash('error', 'Email and phone are required.');
     return res.redirect('/signin');
@@ -90,6 +103,34 @@ router.post('/signin', async (req, res) => {
     if (storedPassword !== phone) {
       req.flash('error', 'Invalid credentials.');
       return res.redirect('/signin');
+    }
+    // If MikroTik login URL is provided, hand off to router to grant access
+    if (linkLoginOnly) {
+      let chapMd5 = '';
+      if (chapId && chapChallenge) {
+        try {
+          const buf = Buffer.concat([
+            Buffer.from(chapId, 'hex'),
+            Buffer.from(phone, 'utf8'),
+            Buffer.from(chapChallenge, 'hex'),
+          ]);
+          chapMd5 = crypto.createHash('md5').update(buf).digest('hex');
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error('CHAP MD5 generation failed, falling back to PAP:', e);
+        }
+      }
+      return res.render('mt_handoff', {
+        title: 'Authorizing...',
+        linkLoginOnly,
+        email,
+        phone,
+        dst,
+        popup,
+        chapId,
+        chapChallenge,
+        chapMd5,
+      });
     }
     return res.redirect('/success');
   } catch (err) {

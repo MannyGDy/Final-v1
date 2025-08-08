@@ -111,7 +111,7 @@
     const inputData = <%- JSON.stringify((perUser || []).map(r => Number(r.input_octets))) %>;
     const outputData = <%- JSON.stringify((perUser || []).map(r => Number(r.output_octets))) %>;
     const ctx = document.getElementById('trafficChart');
-    if (ctx && labels.length) {
+    if (window.Chart && ctx && labels.length) {
       new Chart(ctx, {
         type: 'bar',
         data: {
@@ -128,7 +128,7 @@
       });
     }
   })();
-</script>
+  </script>
 
 <%- include('partials/foot') %>
 
